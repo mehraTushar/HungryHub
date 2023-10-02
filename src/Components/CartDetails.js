@@ -1,8 +1,10 @@
+import { useState } from "react";
 import CartItem from "./CartItem";
 import { useDispatch, useSelector } from "react-redux";
 
 const CartDetails = () => {
   const cartList = useSelector((state) => state.cart.cartItems);
+
   return (
     <div className=" h-full w-96 p-6 shadow-2xl ml-8">
       <div className="flex justify-start items-center gap-3">

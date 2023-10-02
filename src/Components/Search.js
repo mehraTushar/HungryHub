@@ -46,7 +46,7 @@ export const ExpandSearchBar = ({
         onClick={() => {
           setIsSearchActive(false);
           setSearchMenu("");
-          setFilterMenu(Menu);
+          setFilterMenu(Menu?.itemCards);
         }}
       />
     </>

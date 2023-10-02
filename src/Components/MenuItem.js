@@ -19,7 +19,7 @@ function MenuItem({ Item, Resturant }) {
   };
   // console.log(Item.defaultPrice === undefined ? Item.price : Item.defaultPrice);
   return (
-    <div className=" flex justify-between pt-10">
+    <div className=" flex justify-between py-10 border-b-2">
       <div className=" flex flex-col gap-1">
         <h3 className="font-bold">{Item.name}</h3>
         <p className=" font-semibold">

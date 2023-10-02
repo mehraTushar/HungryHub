@@ -1,5 +1,5 @@
 import CartCard from "./CartCard";
-import Swal from "sweetalert2";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSelector } from "react-redux";
 
@@ -14,6 +14,15 @@ import CartDetails from "./CartDetails";
 import CartEmpty from "./CartEmpty";
 const Cart = () => {
   const cartList = useSelector((state) => state.cart.cartItems);
+  const [address, setAddress] = useState("");
+  useEffect(() => {
+    fetch(
+      "https://api.geoapify.com/v1/geocode/reverse?lat=30.7202948&lon=76.6759107&apiKey=82506e379b8446e8a633673faa199756"
+    )
+      .then((response) => response.json())
+      .then((result) => setAddress(result.features[0].properties.formatted))
+      .catch((error) => console.log("error", error));
+  }, []);
   {
     return cartList.length === 0 ? (
       <CartEmpty />
@@ -49,9 +58,7 @@ const Cart = () => {
               />
             </div>
             <div className=" text-xl font-semibold">Home</div>
-            <div className=" text-xl font-semibold">
-              Acme heights Ext 2 Sector 117
-            </div>
+            <div className=" text-xl font-semibold">{address}</div>
             <div>
               <FontAwesomeIcon
                 icon={faLocationDot}

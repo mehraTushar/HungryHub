@@ -14,6 +14,7 @@ import BreadCrumb from "./Breadcrumb";
 import MenuItem from "./MenuItem";
 import { ExpandSearchBar } from "./Search";
 import NoMatch from "./NoMatch";
+import MenuCategory from "./MenuCategory";
 const ResturantMenu = () => {
   const { id } = useParams();
   const [Menu, setMenu] = useState("");
@@ -25,10 +26,10 @@ const ResturantMenu = () => {
     const res = useResturantById(id);
     res.then((json) => {
       const data =
-        json?.data?.cards[2]?.groupedCard?.cardGroupMap?.REGULAR?.cards[1]?.card
-          ?.card?.itemCards;
+        json?.data?.cards[2]?.groupedCard?.cardGroupMap?.REGULAR?.cards;
       setMenu(data);
       setFilterMenu(data);
+      // console.log(data);
       setResturant(json?.data?.cards[0]?.card?.card?.info);
     });
   }, []);
@@ -115,26 +116,34 @@ const ResturantMenu = () => {
             <span>{Resturant.costForTwoMessage}</span>
           </div>
         </div>
-        <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
+        <hr className="h-px mt-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
         <div className="pt-8">
-          <div>
-            {FilterMenu?.length === 0 ? (
-              <NoMatch></NoMatch>
-            ) : (
-              FilterMenu?.map((menuItem) => {
-                return (
-                  <>
-                    <MenuItem
-                      Resturant={Resturant}
-                      Item={menuItem.card.info}
-                      key={menuItem.card.info.id}
-                    ></MenuItem>
-                    <hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"></hr>
-                  </>
-                );
-              })
-            )}
-          </div>
+          {FilterMenu?.length === 0 ? (
+            <NoMatch></NoMatch>
+          ) : (
+            FilterMenu?.filter((item) => {
+              return (
+                item.card.card.title !== undefined &&
+                item?.card?.card?.itemCards !== undefined
+              );
+            }).map((item, index) => {
+              return (
+                <MenuCategory
+                  item={item}
+                  index={index}
+                  key={item.card.card.title}
+                  Resturant={Resturant}
+                />
+              );
+            })
+            // FilterMenu?.itemCards?.map((menuItem) => {
+            //   return (
+            //     <>
+
+            //     </>
+            //   );
+            // })
+          )}
         </div>
       </section>
     </>
