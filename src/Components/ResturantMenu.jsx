@@ -34,7 +34,6 @@ const ResturantMenu = () => {
     setSearchMenu: setSearchMenu,
     setIsSearchActive: setIsSearchActive,
   };
-
   if (filterData === '' && Resturant === '') return <ResturantMenuShimmer />;
   return (
     <>

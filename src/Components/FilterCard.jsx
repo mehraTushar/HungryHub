@@ -16,12 +16,6 @@ const FilterCards = ({ FilterResList }) => {
       <section className="foodCardList mx-auto max-w-7xl grid gap-3 sm:grid-cols-2 sm:grid-rows-2 md:grid-cols-3 md:grid-rows-3 p-6 lg:px-7">
         {FilterResList?.map((restaurant) => {
           let resId = restaurant?.info.id;
-          let currItem = {
-            ResturantID: resId,
-            ResturantName: restaurant?.info.name,
-            ResturantAreaName: restaurant?.info.areaName,
-            Quantity: 0,
-          };
           return (
             <Link
               to={'/restaurant/' + resId}

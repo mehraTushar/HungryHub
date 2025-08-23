@@ -22,7 +22,7 @@ const Card = ({ data }) => {
         <div className="px-6 py-4">
           <div className="font-bold text-xl my-2 text-black dark:text-white line-clamp-1 ">{data?.name}</div>
           <div className="flex items-center font-semibold align-middle mb-2">
-            <span className="align-middle">
+            <span className="flex items-center gap-1">
               <FontAwesomeIcon
                 icon={faStar}
                 className={`faStar text-white p-1 rounded-full text-xs ${

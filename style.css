@@ -7,6 +7,10 @@
   --primary: transparent;
   --secondary: #a8a8a8;
 }
+div#root {
+  position: relative;
+  height: 100vh;
+}
 .cartItems::-webkit-scrollbar {
   width: 10px;
 }
@@ -23,4 +27,18 @@
 }
 .blend-multiply {
   mix-blend-mode: multiply;
+}
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
+.custom-swal-width {
+  min-width: 50%; /* Ensures responsiveness on smaller screens */
 }
