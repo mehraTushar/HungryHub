@@ -1,24 +1,23 @@
 import CartCard from './CartCard';
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
-import {
-  faCircleUser,
-  faLocationDot,
-  faWallet,
-  faCircleCheck,
-  faCircleXmark,
-  faCreditCard,
-} from '@fortawesome/free-solid-svg-icons';
+import { faLocationDot, faWallet, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import CartDetails from './CartDetails';
 import CartEmpty from './CartEmpty';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { CartNotLoggedIn } from './CartNotLoggedIn';
 import useLocation from '../hooks/useLocation';
 import { useForm } from 'react-hook-form';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { useSwalToast } from '../hooks/useSwalToast';
+import { reset } from '../Features/Cart/ResturantSlice';
 
 const Cart = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const {
     register,
     handleSubmit,
@@ -29,13 +28,7 @@ const Cart = () => {
   const userId = useLocalStorage('loggedInUser');
   const [address, setAddress] = useState('');
   const { latitude, longitude, loading: locationLoading } = useLocation();
-
-  function onSubmit(data) {
-    const res = data;
-
-    useSwalToast('error', 'Please Enter Correct Password');
-    return;
-  }
+  const [totalBill, setTotalBill] = useState(0);
 
   useEffect(() => {
     if (latitude && longitude && !locationLoading) {
@@ -52,35 +45,57 @@ const Cart = () => {
     Swal.fire({
       title: 'Payment',
       html: `
-      <form onSubmit="${handleSubmit(onSubmit)}">
-        <div class="relative mb-6">
-          <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-            <FontAwesomeIcon icon={faCreditCard} className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-          </div>
-          <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Card Number">
-        </div>
-        <section class='flex justify-start gap-2'>
+        <form id="paymentForm">
           <div class="relative mb-6">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-              <FontAwesomeIcon icon={faCreditCard} className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-            </div>
-            <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Expiry Date">
+            <input id="cardNumber" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Card Number">
           </div>
-          <div class="relative mb-6">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-              <i class="fa-brands fa-cc-visa"></i>
+          <section class='flex justify-start gap-2'>
+            <div class="relative mb-6">
+              <input id="expiryDate" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Expiry Date (MM/YY)">
             </div>
-            <input type="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="CVV">
-          </div>
-        </section>
-        <button class="swal2-confirm swal2-styled" style="width: 100%; margin-top: 1rem;">
-          Pay $10.00
-        </button>
+            <div class="relative mb-6">
+              <input id="cvv" type="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="CVV">
+            </div>
+          </section>
+          <button id="payButton" type="button" class="swal2-confirm swal2-styled" style="width: 100%; margin-top: 1rem;">
+            Pay ₹${totalBill.toFixed(2)}
+          </button>
         </form>
       `,
       showConfirmButton: false,
       customClass: {
         popup: 'custom-swal-width',
+      },
+      didOpen: () => {
+        document.getElementById('payButton').addEventListener('click', () => {
+          const cardNumber = document.getElementById('cardNumber').value.trim();
+          const expiryDate = document.getElementById('expiryDate').value.trim();
+          const cvv = document.getElementById('cvv').value.trim();
+
+          // Validate card number
+          const cardNumberRegex = /^[0-9]{16}$/;
+          if (!cardNumberRegex.test(cardNumber)) {
+            Swal.showValidationMessage('Invalid card number. Please enter a 16-digit card number.');
+            return;
+          }
+
+          // Validate expiry date
+          const expiryDateRegex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+          if (!expiryDateRegex.test(expiryDate)) {
+            Swal.showValidationMessage('Invalid expiry date. Please enter in MM/YY format.');
+            return;
+          }
+
+          // Validate CVV
+          const cvvRegex = /^[0-9]{3,4}$/;
+          if (!cvvRegex.test(cvv)) {
+            Swal.showValidationMessage('Invalid CVV. Please enter a 3 or 4-digit CVV.');
+            return;
+          }
+          useSwalToast('success', `Your payment of ₹${totalBill.toFixed(2)} was successful!`);
+          dispatch(reset());
+          navigate('/home');
+        });
       },
     });
   };
@@ -108,7 +123,10 @@ const Cart = () => {
         </CartCard>
         <CartCard>
           <div className="text-xl font-semibold">Choose payment method</div>
-          <button className="bg-green-500 font-bold text-white text-xl p-6 rounded" onClick={handlePayment}>
+          <button
+            className="bg-green-500 font-bold text-white text-xl p-6 rounded"
+            onClick={() => handlePayment(totalBill)}
+          >
             Proceed To Pay
           </button>
           <div>
@@ -116,11 +134,9 @@ const Cart = () => {
           </div>
         </CartCard>
       </div>
-      <CartDetails />
+      <CartDetails setTotalBill={setTotalBill} />
     </section>
   );
 };
 
 export default Cart;
-
-function paymentSubmit() {}

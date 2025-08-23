@@ -14,6 +14,9 @@ export const ResturantSlice = createSlice({
         item.Quantity += 1;
       }
     },
+    reset: (state, action) => {
+      state.cartItems = [];
+    },
     removeItem: (state, action) => {
       const itemIndex = state.cartItems.findIndex((item) => item.Id === action.payload.Id);
       if (itemIndex !== -1) {
@@ -30,6 +33,6 @@ export const ResturantSlice = createSlice({
   },
 });
 
-export const { addItem, removeItem, addInfo } = ResturantSlice.actions;
+export const { addItem, removeItem, addInfo, reset } = ResturantSlice.actions;
 
 export default ResturantSlice.reducer;

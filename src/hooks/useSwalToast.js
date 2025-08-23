@@ -5,11 +5,14 @@ export const useSwalToast = (icon, title) => {
     toast: true,
     position: 'top-end',
     showConfirmButton: false,
-    timer: 3000,
+    timer: 5000,
     timerProgressBar: true,
     didOpen: (toast) => {
       toast.onmouseenter = Swal.stopTimer;
       toast.onmouseleave = Swal.resumeTimer;
+      toast.addEventListener('click', () => {
+        Swal.close();
+      });
     },
   });
   Toast.fire({
